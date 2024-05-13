@@ -125,7 +125,7 @@ jobs:
             /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli*
             /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod*
       - name: download arm artifacts
-        uses: actions/download-artifact@4
+        uses: actions/download-artifact@v4
         with:
           name: Cross-Mac aarch64
           path: 
@@ -135,7 +135,7 @@ jobs:
         run: 
           llvm-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod
           llvm-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli
-      - uses: actions/upload-artifact@4 
+      - uses: actions/upload-artifact@v4 
         with:
           name: Cross-Mac Universal
           path: 
