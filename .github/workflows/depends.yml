@@ -120,8 +120,7 @@ jobs:
         run: 
           sudo apt update; 
           sudo apt -y install clang lldb lld llvm libdispatch-dev
-          mkdir -p /home/runner/work/tapi &&
-          cd /home/runner/work/tapi &&
+          cd /home/runner/work/ &&
           git clone https://github.com/tpoechtrager/apple-libtapi.git &&
           cd apple-libtapi &&
           [INSTALLPREFIX=/home/runner/cctools] ./build.sh &&
