@@ -68,6 +68,12 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
+    - uses: actions/checkout@v4
+      with:
+        repository: tpoechtrager/apple-libtapi
+    - uses: actions/checkout@v4
+      with:
+        repository: tpoechtrager/cctools-port
 # Most volatile cache
     - name: ccache
       uses: actions/cache@v4
@@ -120,20 +126,17 @@ jobs:
         run: 
           sudo apt update; 
           sudo apt -y install clang lldb lld llvm libdispatch-dev
-          cd /home/runner/work/ &&
-          git clone https://github.com/tpoechtrager/apple-libtapi.git &&
-          cd apple-libtapi &&
-          [INSTALLPREFIX=/home/runner/cctools] ./build.sh &&
+          cd apple-libtapi
+          [INSTALLPREFIX=/home/runner/cctools] ./build.sh
           ./install.sh
-          cd /home/runner/work/ &&
-          git clone https://github.com/tpoechtrager/cctools-port.git &&
-          cd cctools-port/cctools &&
+          cd ..
+          cd cctools-port/cctools
           ./configure \
             [--prefix=/home/runner/cctools] \
             [--with-libtapi=/home/runner/cctools] \
             [--target=x86_64-apple-darwin11] \
-            [--with-llvm-config=...] &&
-          make &&
+            [--with-llvm-config=...]
+          make
           make install
       - uses: actions/download-artifact@v4
         with:
