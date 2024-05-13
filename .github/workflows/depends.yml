@@ -154,7 +154,7 @@ jobs:
          /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod*
     - name: create universal artifacts
       run: 
-        cd $GITHUB_WORKSPACE/cctools/bin
+        cd $GITHUB_WORKSPACE/cctools/bin;
         x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod;
         x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli;
     - uses: actions/upload-artifact@v4 
