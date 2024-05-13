@@ -45,6 +45,7 @@
 #include <tuple>
 #include <vector>
 
+#include "p2p/net_node.h"
 #include "version.h"
 #include "string_tools.h"
 #include "common/util.h"

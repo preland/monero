@@ -14,3 +14,6 @@
 	path = external/supercop
 	url = https://github.com/monero-project/supercop
 	branch = monero
+[submodule "external/libsam3"]
+	path = external/libsam3
+	url = https://github.com/i2p/libsam3.git

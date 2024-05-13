@@ -136,6 +136,11 @@ namespace daemon_args
     "no-zmq"
   , "Disable ZMQ RPC server"
   };
+  const command_line::arg_descriptor<bool> arg_i2p_sam_enabled = {
+    "i2p-sam"
+  , "Enable SAMv3 protocol for I2P (experimental)"
+  , true
+  };
 
 }  // namespace daemon_args
 
