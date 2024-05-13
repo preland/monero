@@ -29,39 +29,39 @@ jobs:
       fail-fast: false
       matrix:
         toolchain:
-          - name: "RISCV 64bit"
-            host: "riscv64-linux-gnu"
-            packages: "python3 gperf g++-riscv64-linux-gnu"
-          - name: "ARM v7"
-            host: "arm-linux-gnueabihf"
-            packages: "python3 gperf g++-arm-linux-gnueabihf"
-          - name: "ARM v8"
-            host: "aarch64-linux-gnu"
-            packages: "python3 gperf g++-aarch64-linux-gnu"
-          - name: "i686 Win"
-            host: "i686-w64-mingw32"
-            packages: "python3 g++-mingw-w64-i686"
-          - name: "i686 Linux"
-            host: "i686-pc-linux-gnu"
-            packages: "gperf cmake g++-multilib python3-zmq"
-          - name: "Win64"
-            host: "x86_64-w64-mingw32"
-            packages: "cmake python3 g++-mingw-w64-x86-64"
-          - name: "x86_64 Linux"
-            host: "x86_64-unknown-linux-gnu"
-            packages: "gperf cmake python3-zmq libdbus-1-dev libharfbuzz-dev"
+          # - name: "RISCV 64bit"
+            # host: "riscv64-linux-gnu"
+            # packages: "python3 gperf g++-riscv64-linux-gnu"
+          # - name: "ARM v7"
+          #   host: "arm-linux-gnueabihf"
+          #   packages: "python3 gperf g++-arm-linux-gnueabihf"
+          # - name: "ARM v8"
+          #   host: "aarch64-linux-gnu"
+          #   packages: "python3 gperf g++-aarch64-linux-gnu"
+          # - name: "i686 Win"
+          #   host: "i686-w64-mingw32"
+          #   packages: "python3 g++-mingw-w64-i686"
+          # - name: "i686 Linux"
+          #   host: "i686-pc-linux-gnu"
+          #   packages: "gperf cmake g++-multilib python3-zmq"
+          # - name: "Win64"
+          #   host: "x86_64-w64-mingw32"
+          #   packages: "cmake python3 g++-mingw-w64-x86-64"
+          # - name: "x86_64 Linux"
+          #   host: "x86_64-unknown-linux-gnu"
+          #   packages: "gperf cmake python3-zmq libdbus-1-dev libharfbuzz-dev"
           - name: "Cross-Mac x86_64"
             host: "x86_64-apple-darwin"
             packages: "cmake imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev python3-setuptools-git"
           - name: "Cross-Mac aarch64"
             host: "aarch64-apple-darwin"
             packages: "cmake imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev python3-setuptools-git"
-          - name: "x86_64 Freebsd"
-            host: "x86_64-unknown-freebsd"
-            packages: "clang-8 gperf cmake python3-zmq libdbus-1-dev libharfbuzz-dev"
-          - name: "ARMv8 Android"
-            host: "aarch64-linux-android"
-            packages: "gperf cmake python3"
+          # - name: "x86_64 Freebsd"
+          #   host: "x86_64-unknown-freebsd"
+          #   packages: "clang-8 gperf cmake python3-zmq libdbus-1-dev libharfbuzz-dev"
+          # - name: "ARMv8 Android"
+          #   host: "aarch64-linux-android"
+          #   packages: "gperf cmake python3"
     name: ${{ matrix.toolchain.name }}
     steps:
     - uses: actions/checkout@v4
@@ -117,7 +117,25 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: install dependencies
-        run: sudo apt update; sudo apt -y install clang lldb lld
+        run: 
+          sudo apt update; 
+          sudo apt -y install clang lldb lld llvm libdispatch-dev
+          mkdir -p /home/runner/work/tapi &&
+          cd /home/runner/work/tapi &&
+          git clone https://github.com/tpoechtrager/apple-libtapi.git &&
+          cd apple-libtapi &&
+          [INSTALLPREFIX=/home/runner/cctools] ./build.sh &&
+          ./install.sh
+          cd /home/runner/work/ &&
+          git clone https://github.com/tpoechtrager/cctools-port.git &&
+          cd cctools-port/cctools &&
+          ./configure \
+            [--prefix=/home/runner/cctools] \
+            [--with-libtapi=/home/runner/cctools] \
+            [--target=x86_64-apple-darwin11] \
+            [--with-llvm-config=...] &&
+          make &&
+          make install
       - uses: actions/download-artifact@v4
         with:
           name: Cross-Mac x86_64
@@ -133,8 +151,8 @@ jobs:
            /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod*
       - name: create universal artifacts
         run: 
-          llvm-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod
-          llvm-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli
+          /home/runner/cctools/bin/x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod
+          /home/runner/cctools/bin/x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli
       - uses: actions/upload-artifact@v4 
         with:
           name: Cross-Mac Universal
