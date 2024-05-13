@@ -68,13 +68,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
-    - uses: actions/checkout@v4
-      with:
-        repository: tpoechtrager/apple-libtapi
-    - uses: actions/checkout@v4
-      with:
-        repository: tpoechtrager/cctools-port
-# Most volatile cache
+   # Most volatile cache
     - name: ccache
       uses: actions/cache@v4
       with:
@@ -122,42 +116,49 @@ jobs:
     needs: build-cross
     runs-on: ubuntu-20.04
     steps:
-      - name: install dependencies
-        run: 
-          sudo apt update; 
-          sudo apt -y install clang lldb lld llvm libdispatch-dev
-          cd apple-libtapi
-          [INSTALLPREFIX=/home/runner/cctools] ./build.sh
-          ./install.sh
-          cd ..
-          cd cctools-port/cctools
-          ./configure \
-            [--prefix=/home/runner/cctools] \
-            [--with-libtapi=/home/runner/cctools] \
-            [--target=x86_64-apple-darwin11] \
-            [--with-llvm-config=...]
-          make
-          make install
-      - uses: actions/download-artifact@v4
-        with:
-          name: Cross-Mac x86_64
-          path: 
-            /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli*
-            /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod*
-      - name: download arm artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: Cross-Mac aarch64
-          path: 
-           /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli*
-           /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod*
-      - name: create universal artifacts
-        run: 
-          /home/runner/cctools/bin/x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod
-          /home/runner/cctools/bin/x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli
-      - uses: actions/upload-artifact@v4 
-        with:
-          name: Cross-Mac Universal
-          path: 
-            /home/runner/work/monero/monero/build/universal/monerod
-            /home/runner/work/monero/monero/build/universal/monero-wallet-cli
+    - uses: actions/checkout@v4
+      with:
+        repository: tpoechtrager/apple-libtapi
+    - uses: actions/checkout@v4
+      with:
+        repository: tpoechtrager/cctools-port
+
+    - name: install dependencies
+      run: 
+        sudo apt update; 
+        sudo apt -y install clang lldb lld llvm libdispatch-dev
+        cd apple-libtapi
+        [INSTALLPREFIX=/home/runner/cctools] ./build.sh
+        ./install.sh
+        cd ..
+        cd cctools-port/cctools
+        ./configure \
+          [--prefix=/home/runner/cctools] \
+          [--with-libtapi=/home/runner/cctools] \
+          [--target=x86_64-apple-darwin11] \
+          [--with-llvm-config=...]
+        make
+        make install
+    - uses: actions/download-artifact@v4
+      with:
+        name: Cross-Mac x86_64
+        path: 
+          /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli*
+          /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod*
+    - name: download arm artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: Cross-Mac aarch64
+        path: 
+         /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli*
+         /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod*
+    - name: create universal artifacts
+      run: 
+        /home/runner/cctools/bin/x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod
+        /home/runner/cctools/bin/x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli
+    - uses: actions/upload-artifact@v4 
+      with:
+        name: Cross-Mac Universal
+        path: 
+          /home/runner/work/monero/monero/build/universal/monerod
+          /home/runner/work/monero/monero/build/universal/monero-wallet-cli
