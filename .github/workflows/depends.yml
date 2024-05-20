@@ -119,7 +119,7 @@ jobs:
     - name: install dependencies
       run: 
         sudo apt update; 
-        sudo apt -y install clang lldb lld llvm libdispatch-dev libblocksruntime libc++-10-dev tree make;
+        sudo apt -y install clang lldb lld llvm libdispatch-dev libblocksruntime-dev libc++-10-dev tree make;
         pwd;
     - uses: actions/checkout@v4
       with:
