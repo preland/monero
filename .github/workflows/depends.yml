@@ -121,22 +121,14 @@ jobs:
         sudo apt update; 
         sudo apt -y install clang lldb lld llvm libdispatch-dev tree;
         pwd;
-        tree;
-    - uses: actions/checkout@v4
-      with:
-        repository: tpoechtrager/apple-libtapi
-    - run: 
-        cd ../apple-libtapi;
-        [INSTALLPREFIX=/home/runner/cctools] ./build.sh;
-        ./install.sh;
     - uses: actions/checkout@v4
       with:
         repository: tpoechtrager/cctools-port
     - run: 
+        tree;
         cd cctools-port/cctools;
         ./configure \
-          [--prefix=/home/runner/cctools] \
-          [--with-libtapi=/home/runner/cctools] \
+          [--prefix=$GITHUB_WORKSPACE/cctools] \
           [--target=x86_64-apple-darwin11] \
           [--with-llvm-config=...]
         make;
