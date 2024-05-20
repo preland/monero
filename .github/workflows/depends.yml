@@ -115,7 +115,13 @@ jobs:
     name: Cross-Mac Universal 
     needs: build-cross
     runs-on: ubuntu-20.04
-    steps:
+    steps:    
+    - name: install dependencies
+      run: 
+        sudo apt update; 
+        sudo apt -y install clang lldb lld llvm libdispatch-dev tree;
+        pwd;
+        tree;
     - uses: actions/checkout@v4
       with:
         repository: tpoechtrager/apple-libtapi
@@ -135,12 +141,6 @@ jobs:
           [--with-llvm-config=...]
         make;
         make install;
-    - name: install dependencies
-      run: 
-        sudo apt update; 
-        sudo apt -y install clang lldb lld llvm libdispatch-dev tree;
-        pwd;
-        tree;
     - uses: actions/download-artifact@v4
       with:
         name: Cross-Mac x86_64
