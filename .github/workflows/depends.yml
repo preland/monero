@@ -119,26 +119,28 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: tpoechtrager/apple-libtapi
-        run: 
-          cd ../apple-libtapi;
-          [INSTALLPREFIX=/home/runner/cctools] ./build.sh;
-          ./install.sh;
+    - run: 
+        cd ../apple-libtapi;
+        [INSTALLPREFIX=/home/runner/cctools] ./build.sh;
+        ./install.sh;
     - uses: actions/checkout@v4
       with:
         repository: tpoechtrager/cctools-port
-        run: 
-          cd cctools-port/cctools;
-          ./configure \
-            [--prefix=/home/runner/cctools] \
-            [--with-libtapi=/home/runner/cctools] \
-            [--target=x86_64-apple-darwin11] \
-            [--with-llvm-config=...]
-          make;
-          make install;
+    - run: 
+        cd cctools-port/cctools;
+        ./configure \
+          [--prefix=/home/runner/cctools] \
+          [--with-libtapi=/home/runner/cctools] \
+          [--target=x86_64-apple-darwin11] \
+          [--with-llvm-config=...]
+        make;
+        make install;
     - name: install dependencies
       run: 
         sudo apt update; 
-        sudo apt -y install clang lldb lld llvm libdispatch-dev;
+        sudo apt -y install clang lldb lld llvm libdispatch-dev tree;
+        pwd;
+        tree;
     - uses: actions/download-artifact@v4
       with:
         name: Cross-Mac x86_64
