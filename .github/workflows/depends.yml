@@ -119,20 +119,20 @@ jobs:
     - name: install dependencies
       run: 
         sudo apt update; 
-        sudo apt -y install clang lldb lld llvm libdispatch-dev tree;
+        sudo apt -y install clang lldb lld llvm libdispatch-dev tree make;
         pwd;
     - uses: actions/checkout@v4
       with:
         repository: tpoechtrager/cctools-port
-    - run: 
-        tree;
+    - run:
         cd cctools;
-        ./configure \
-          --prefix=$GITHUB_WORKSPACE/cctools \
-          --target=x86_64-apple-darwin11 \
-          --with-llvm-config=...
+        echo "did cd";
+        ./configure --prefix=$GITHUB_WORKSPACE/cctools --target=x86_64-apple-darwin11;
+        echo "did configure";
         make;
+        echo "did make";
         make install;
+        echo "did install";
     - uses: actions/download-artifact@v4
       with:
         name: Cross-Mac x86_64
