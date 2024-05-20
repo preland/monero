@@ -128,9 +128,9 @@ jobs:
         tree;
         cd cctools;
         ./configure \
-          [--prefix=$GITHUB_WORKSPACE/cctools] \
-          [--target=x86_64-apple-darwin11] \
-          [--with-llvm-config=...]
+          --prefix=$GITHUB_WORKSPACE/cctools \
+          --target=x86_64-apple-darwin11 \
+          --with-llvm-config=...
         make;
         make install;
     - uses: actions/download-artifact@v4
