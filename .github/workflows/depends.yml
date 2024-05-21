@@ -112,57 +112,28 @@ jobs:
           /home/runner/work/monero/monero/build/${{ matrix.toolchain.host }}/release/bin/monero-wallet-cli*
           /home/runner/work/monero/monero/build/${{ matrix.toolchain.host }}/release/bin/monerod*
   mac_universal:
-    name: Cross-Mac Universal 
-    needs: build-cross
-    runs-on: ubuntu-20.04
-    steps:    
-    - name: install dependencies
-      run: 
-        sudo apt update; 
-        sudo apt -y install cmake ninja-build systemtap-sdt-dev libbsd-dev linux-libc-dev clang lldb lld llvm libdispatch-dev libblocksruntime-dev libc++-10-dev tree make;
-        pwd;
-    - uses: actions/checkout@v4
-      with:
-        repository: tpoechtrager/apple-libdispatch
-    - run:
-        mkdir build;
-        cd build;
-        cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..;
-        ninja;
-        ninja install;
-    - uses: actions/checkout@v4
-      with:
-        repository: tpoechtrager/cctools-port
-    - run:
-        cd cctools;
-        echo "did cd";
-        ./configure --prefix=$GITHUB_WORKSPACE/cctools --target=x86_64-apple-darwin11;
-        echo "did configure";
-        make;
-        echo "did make";
-        make install;
-        echo "did install";
-    - uses: actions/download-artifact@v4
-      with:
-        name: Cross-Mac x86_64
-        path: 
-          /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli*
-          /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod*
-    - name: download arm artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: Cross-Mac aarch64
-        path: 
-         /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli*
-         /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod*
-    - name: create universal artifacts
-      run: 
-        cd $GITHUB_WORKSPACE/cctools/bin;
-        x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monerod /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monerod -output /home/runner/work/monero/monero/build/universal/monerod;
-        x86_64-apple-darwin-lipo /home/runner/work/monero/monero/build/x86_64-apple-darwin/release/bin/monero-wallet-cli /home/runner/work/monero/monero/build/aarch64-apple-darwin/release/bin/monero-wallet-cli -output /home/runner/work/monero/monero/build/universal/monero-wallet-cli;
-    - uses: actions/upload-artifact@v4 
-      with:
-        name: Cross-Mac Universal
-        path: 
-          /home/runner/work/monero/monero/build/universal/monerod
-          /home/runner/work/monero/monero/build/universal/monero-wallet-cli
+  - runs-on: ubuntu-20.04
+  - name: macos-universal-binary-action
+    uses: manojkarthick/macos-universal-binary-action@v0        
+    with:
+      # Owner of the Github repository
+      owner: preland
+      # Github repository name
+      repository: monero
+      # Github release tag for asset download/upload
+      # tag: # optional, default is latest
+      # Substring to filter the amd64 binary
+      amd64: "Cross-Mac x86_64"
+      # Substring to filter the amd64 binary
+      arm64: "Cross-Mac aarch64"
+        # Specify whether Github assets are compressed
+        # compressed: # optional, default is true
+        # Specify if files are wrapped inside a folder with name of the archive
+        # folder-wrapped: # optional, default is false
+        # Specify path to the binary in the compressed archive
+        # binary-path: # optional
+        # Overwrite if a binary of the same name already exists
+        # overwrite: # optional, default is false
+        # Identifier string for the Github asset containing the universal binary
+        # universal-identifier: # optional, default is all
+              
