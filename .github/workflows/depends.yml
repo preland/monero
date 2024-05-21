@@ -119,7 +119,7 @@ jobs:
     - uses: "manojkarthick/macos-universal-binary-action@v0"
       with:
         owner: "preland"
-        repo: "monero"
+        repository: "monero"
         # tag:
         amd64: "Cross-Mac x86_64"
         arm64: "Cross-Mac aarch64"
