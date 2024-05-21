@@ -119,8 +119,17 @@ jobs:
     - name: install dependencies
       run: 
         sudo apt update; 
-        sudo apt -y install clang lldb lld llvm libdispatch-dev libblocksruntime-dev libc++-10-dev tree make;
+        sudo apt -y install cmake ninja-build systemtap-sdt-dev libbsd-dev linux-libc-dev clang lldb lld llvm libdispatch-dev libblocksruntime-dev libc++-10-dev tree make;
         pwd;
+    - uses: actions/checkout@v4
+      with:
+        repository: tpoechtrager/apple-libdispatch
+    - run:
+        mkdir build;
+        cd build;
+        cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..;
+        ninja;
+        ninja install;
     - uses: actions/checkout@v4
       with:
         repository: tpoechtrager/cctools-port
