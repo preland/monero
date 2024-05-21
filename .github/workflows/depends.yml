@@ -116,7 +116,7 @@ jobs:
     needs: build-cross
     runs-on: ubuntu-20.04
     steps:
-    - uses: "manojkarthick/macos-universal-binary-action@v0.1"
+    - uses: "manojkarthick/macos-universal-binary-action@v0"
       with:
         owner: "preland"
         repo: "monero"
