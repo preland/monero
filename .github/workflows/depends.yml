@@ -111,29 +111,19 @@ jobs:
         path: |
           /home/runner/work/monero/monero/build/${{ matrix.toolchain.host }}/release/bin/monero-wallet-cli*
           /home/runner/work/monero/monero/build/${{ matrix.toolchain.host }}/release/bin/monerod*
-  mac_universal:
-  - runs-on: ubuntu-20.04
-  - name: macos-universal-binary-action
-    uses: manojkarthick/macos-universal-binary-action@v0        
-    with:
-      # Owner of the Github repository
-      owner: preland
-      # Github repository name
-      repository: monero
-      # Github release tag for asset download/upload
-      # tag: # optional, default is latest
-      # Substring to filter the amd64 binary
-      amd64: "Cross-Mac x86_64"
-      # Substring to filter the amd64 binary
-      arm64: "Cross-Mac aarch64"
-        # Specify whether Github assets are compressed
-        # compressed: # optional, default is true
-        # Specify if files are wrapped inside a folder with name of the archive
-        # folder-wrapped: # optional, default is false
-        # Specify path to the binary in the compressed archive
-        # binary-path: # optional
-        # Overwrite if a binary of the same name already exists
-        # overwrite: # optional, default is false
-        # Identifier string for the Github asset containing the universal binary
-        # universal-identifier: # optional, default is all
-              
+  mac-universal:
+    name: Cross-Mac Universal
+    needs: build-cross
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: "manojkarthick/macos-universal-binary-action@v0.1"
+      with:
+        owner: "preland"
+        repo: "monero"
+        # tag:
+        amd64: "Cross-Mac x86_64"
+        arm64: "Cross-Mac aarch64"
+        #compressed: "true"
+        #overwrite: "true"
+        #universal-identifier: "all"
+            
