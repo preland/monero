@@ -121,8 +121,8 @@ jobs:
         owner: "preland"
         repository: "monero"
         # tag:
-        amd64: "Cross-Mac x86_64"
-        arm64: "Cross-Mac aarch64"
+        amd64: "Cross-Mac\ x86_64"
+        arm64: "Cross-Mac\ aarch64"
         #compressed: "true"
         #overwrite: "true"
         #universal-identifier: "all"
