@@ -1378,6 +1378,8 @@ namespace cryptonote
           add_reason(reason, "too few outputs");
         if ((res.tx_extra_too_big = tvc.m_tx_extra_too_big))
           add_reason(reason, "tx-extra too big");
+        if ((res.nonzero_unlock_time = tvc.m_nonzero_unlock_time))
+          add_reason(reason, "tx unlock time is not zero");
         const std::string punctuation = reason.empty() ? "" : ": ";
         if (tvc.m_verifivation_failed)
         {
@@ -3019,15 +3021,9 @@ namespace cryptonote
 
     CHECK_PAYMENT(req, res, COST_PER_FEE_ESTIMATE);
 
-    const uint8_t version = m_core.get_blockchain_storage().get_current_hard_fork_version();
-    if (version >= HF_VERSION_2021_SCALING)
     {
       m_core.get_blockchain_storage().get_dynamic_base_fee_estimate_2021_scaling(req.grace_blocks, res.fees);
       res.fee = res.fees[0];
-    }
-    else
-    {
-      res.fee = m_core.get_blockchain_storage().get_dynamic_base_fee_estimate(req.grace_blocks);
     }
     res.quantization_mask = Blockchain::get_fee_quantization_mask();
     res.status = CORE_RPC_STATUS_OK;
