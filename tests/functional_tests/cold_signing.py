@@ -149,6 +149,22 @@ class ColdSigningTest():
                     hot_val = hot_transfers_list[i][attr]
                     cold_val = cold_transfers_list[i][attr]
                     assert hot_val == cold_val, "outputs mismatch ({}, \"{}\"): {} vs {}".format(i, attr, hot_val, cold_val)
+                # tx_hash is expected to be present for the hot wallet since it
+                # knows the transaction id. For a cold wallet that had outputs
+                # imported via `export_outputs`/`import_outputs`, the wallet may
+                # not have the txid and the RPC should return an empty string
+                # instead of a misleading all-zero hex string.
+                hot_tx = hot_transfers_list[i].get('tx_hash', '')
+                cold_tx = cold_transfers_list[i].get('tx_hash', '')
+                # If the hot wallet has a txid, the cold one may legitimately
+                # be empty (imported outputs). Ensure the hot tx is a proper
+                # hex string when non-empty. We don't require equality here.
+                if hot_tx:
+                    assert len(hot_tx) == 64
+                # Cold imported outputs should not return an all-zero txid; if
+                # present it must not be the zero hash string.
+                if cold_tx:
+                    assert cold_tx != '0' * 64
 
         check_transfers_list_consistency(False)
 
