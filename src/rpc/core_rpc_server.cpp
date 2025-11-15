@@ -194,7 +194,7 @@ namespace cryptonote
     return set_bootstrap_daemon(address, credentials, proxy);
   }
   //------------------------------------------------------------------------------------------------------------------------------
-  std::map<std::string, bool> core_rpc_server::get_public_nodes(uint32_t credits_per_hash_threshold/* = 0*/)
+  std::map<std::string, bool> core_rpc_server::get_public_nodes(uint32_t credits_per_hash_threshold/* = 0*/, bool public_only/* = true*/)
   {
     COMMAND_RPC_GET_PUBLIC_NODES::request request;
     COMMAND_RPC_GET_PUBLIC_NODES::response response;
@@ -202,6 +202,7 @@ namespace cryptonote
     request.gray = true;
     request.white = true;
     request.include_blocked = false;
+    request.public_only = public_only;
     if (!on_get_public_nodes(request, response) || response.status != CORE_RPC_STATUS_OK)
     {
       return {};
@@ -244,8 +245,34 @@ namespace cryptonote
     }
     else if (address == "auto")
     {
-      auto get_nodes = [this]() {
-        return get_public_nodes(credits_per_hash_threshold);
+      auto get_nodes = [this, proxy]() {
+        const std::string &actual_proxy = m_bootstrap_daemon_proxy.empty() ? proxy : m_bootstrap_daemon_proxy;
+        bool public_only = true;
+        if (!actual_proxy.empty())
+        {
+          std::vector<nodetool::peerlist_entry> gray, white;
+          m_p2p.get_peerlist(gray, white);
+          for (const auto &entry : white)
+          {
+            if (entry.adr.get_zone() != epee::net_utils::zone::public_)
+            {
+              public_only = false;
+              break;
+            }
+          }
+          if (public_only)
+          {
+            for (const auto &entry : gray)
+            {
+              if (entry.adr.get_zone() != epee::net_utils::zone::public_)
+              {
+                public_only = false;
+                break;
+              }
+            }
+          }
+        }
+        return get_public_nodes(credits_per_hash_threshold, public_only);
       };
       m_bootstrap_daemon.reset(new bootstrap_daemon(std::move(get_nodes), rpc_payment_enabled, m_bootstrap_daemon_proxy.empty() ? proxy : m_bootstrap_daemon_proxy));
     }
@@ -1614,6 +1641,7 @@ namespace cryptonote
 
     COMMAND_RPC_GET_PEER_LIST::request peer_list_req;
     COMMAND_RPC_GET_PEER_LIST::response peer_list_res;
+    peer_list_req.public_only = req.public_only;
     peer_list_req.include_blocked = req.include_blocked;
     const bool success = on_get_peer_list(peer_list_req, peer_list_res, ctx);
     res.status = peer_list_res.status;

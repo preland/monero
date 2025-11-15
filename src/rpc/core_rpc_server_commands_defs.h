@@ -1443,12 +1443,14 @@ inline const std::string get_rpc_status(const bool trusted_daemon, const std::st
       bool gray;
       bool white;
       bool include_blocked;
+      bool public_only;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE_PARENT(rpc_request_base)
         KV_SERIALIZE_OPT(gray, false)
         KV_SERIALIZE_OPT(white, true)
         KV_SERIALIZE_OPT(include_blocked, false)
+        KV_SERIALIZE_OPT(public_only, true)
       END_KV_SERIALIZE_MAP()
     };
     typedef epee::misc_utils::struct_init<request_t> request;
