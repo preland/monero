@@ -161,10 +161,11 @@ class ColdSigningTest():
                 # hex string when non-empty. We don't require equality here.
                 if hot_tx:
                     assert len(hot_tx) == 64
-                # Cold imported outputs should not return an all-zero txid; if
-                # present it must not be the zero hash string.
-                if cold_tx:
-                    assert cold_tx != '0' * 64
+                # Cold imported outputs should return an empty string for txid
+                # (they do not contain transaction metadata); ensure we do not
+                # return an all-zero txid. This guarantees a consistent RPC
+                # response for imported outputs.
+                assert cold_tx == ''
 
         check_transfers_list_consistency(False)
 
