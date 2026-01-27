@@ -172,7 +172,12 @@ struct txpool_tx_meta_t
   uint8_t is_forwarding: 1;
   uint8_t bf_padding: 3;
 
-  uint8_t padding[76]; // till 192 bytes
+  uint8_t padding[44]; // til 160 bytes
+
+  // If non-null, this verification ID is set for this tx only when some mixring passed ver_input_proofs_rings()
+  crypto::hash valid_input_verification_id;
+
+  // 192 bytes total
 
   void set_relay_method(relay_method method) noexcept;
   relay_method get_relay_method() const noexcept;
@@ -186,7 +191,8 @@ struct txpool_tx_meta_t
     return matches_category(get_relay_method(), category);
   }
 };
-
+static_assert(sizeof(txpool_tx_meta_t) == 192, "possible DB migration needed for changes to txpool_tx_meta_t");
+static_assert(offsetof(txpool_tx_meta_t, valid_input_verification_id) == 160, "verif ID wrong alignment");
 
 #define DBF_SAFE       1
 #define DBF_FAST       2
@@ -1300,14 +1306,13 @@ public:
    * @param max_size the maximum size of block/transaction data to return (will be exceeded by one blocks's worth at most, if min_count is met)
    * @param blocks the returned block/transaction data
    * @param pruned whether to return full or pruned tx data
-   * @param skip_coinbase whether to return or skip coinbase transactions (they're in blocks regardless)
    * @param get_miner_tx_hash whether to calculate and return the miner (coinbase) tx hash
    *
    * The call will return at least min_block_count if possible, even if this contravenes max_tx_count
    *
    * @return true iff the blocks and transactions were found
    */
-  virtual bool get_blocks_from(uint64_t start_height, size_t min_block_count, size_t max_block_count, size_t max_tx_count, size_t max_size, std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata>>>>& blocks, bool pruned, bool skip_coinbase, bool get_miner_tx_hash) const = 0;
+  virtual bool get_blocks_from(uint64_t start_height, size_t min_block_count, size_t max_block_count, size_t max_tx_count, size_t max_size, std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata>>>>& blocks, bool pruned, bool get_miner_tx_hash) const = 0;
 
   /**
    * @brief fetches the prunable transaction blob with the given hash
@@ -1503,6 +1508,15 @@ public:
    * @return true if the image is present, otherwise false
    */
   virtual bool has_key_image(const crypto::key_image& img) const = 0;
+
+  /**
+   * @brief check if key images are stored as spent
+   *
+   * @param img the key images to check for
+   *
+   * @return true at element `i` if the `img[i]` is present, otherwise false
+   */
+  virtual std::vector<bool> has_key_images(const epee::span<const crypto::key_image> img) const;
 
   /**
    * @brief add a txpool transaction

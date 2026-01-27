@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2024, The Monero Project
+// Copyright (c) 2025, The Monero Project
 // 
 // All rights reserved.
 // 
@@ -26,9 +26,23 @@
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <assert.h>
+#pragma once
 
-static_assert(1, "FAIL");
-int main(int argc, char *argv[]) {
-	return 0;
+//local headers
+
+//third party headers
+
+//standard headers
+#include <functional>
+
+//forward declarations
+
+namespace tools
+{
+template <typename T>
+void hash_combine(std::size_t &seed, T const& v)
+{
+    // see boost::hash_combine()
+    seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
+} //namespace tools

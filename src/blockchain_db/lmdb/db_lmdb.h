@@ -254,7 +254,7 @@ public:
   bool get_tx_blob(const crypto::hash& h, cryptonote::blobdata &tx) const override;
   bool get_pruned_tx_blob(const crypto::hash& h, cryptonote::blobdata &tx) const override;
   bool get_pruned_tx_blobs_from(const crypto::hash& h, size_t count, std::vector<cryptonote::blobdata> &bd) const override;
-  bool get_blocks_from(uint64_t start_height, size_t min_block_count, size_t max_block_count, size_t max_tx_count, size_t max_size, std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata>>>>& blocks, bool pruned, bool skip_coinbase, bool get_miner_tx_hash) const override;
+  bool get_blocks_from(uint64_t start_height, size_t min_block_count, size_t max_block_count, size_t max_tx_count, size_t max_size, std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata>>>>& blocks, bool pruned, bool get_miner_tx_hash) const override;
   bool get_prunable_tx_blob(const crypto::hash& h, cryptonote::blobdata &tx) const override;
   bool get_prunable_tx_hash(const crypto::hash& tx_hash, crypto::hash &prunable_hash) const override;
 
@@ -281,6 +281,8 @@ public:
   std::vector<std::vector<uint64_t>> get_tx_amount_output_indices(const uint64_t tx_id, size_t n_txes) const override;
 
   bool has_key_image(const crypto::key_image& img) const override;
+
+  std::vector<bool> has_key_images(const epee::span<const crypto::key_image> img) const override;
 
   void add_txpool_tx(const crypto::hash &txid, const cryptonote::blobdata_ref &blob, const txpool_tx_meta_t& meta) override;
   void update_txpool_tx(const crypto::hash &txid, const txpool_tx_meta_t& meta) override;

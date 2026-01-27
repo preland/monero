@@ -287,6 +287,15 @@ namespace cryptonote
     bool have_tx_keyimges_as_spent(const transaction &tx) const;
 
     /**
+     * @brief check if key images are already spent on the blockchain
+     *
+     * @param key_imgs the key images to search for
+     *
+     * @return true at element `i` iff `key_imgs[i]` is already spent in the blockchain, else false
+     */
+    std::vector<bool> have_tx_keyimges_as_spent(const epee::span<const crypto::key_image> key_imgs) const;
+
+    /**
      * @brief check if a key image is already spent on the blockchain
      *
      * Whenever a transaction output is used as an input for another transaction
@@ -438,10 +447,11 @@ namespace cryptonote
      *   powers of 2 less recent from there, so 13, 17, 25, etc...
      *
      * @param ids return-by-reference list to put the resulting hashes in
+     * @param current_height the current blockchain height, return-by-reference
      *
      * @return true
      */
-    bool get_short_chain_history(std::list<crypto::hash>& ids) const;
+    bool get_short_chain_history(std::list<crypto::hash>& ids, uint64_t& current_height) const;
 
     /**
      * @brief get recent block hashes for a foreign chain
@@ -628,11 +638,25 @@ namespace cryptonote
      * @param pmax_used_block_height return-by-reference block height of most recent input
      * @param max_used_block_id return-by-reference block hash of most recent input
      * @param tvc returned information about tx verification
+     * @param valid_input_verification_id_inout a previously valid verID if non-null, set on input verification
      * @param kept_by_block whether or not the transaction is from a previously-verified block
      *
      * @return false if any input is invalid, otherwise true
+     *
+     * If `valid_input_verification_id_inout` is passed as null, then input verification proceeds as normal.
+     * If `valid_input_verification_id_inout` is non-null and the verification ID from the current chain
+     * state matches, then input verification is skipped, assumed to be successful, and
+     * `valid_input_verification_id_inout` is not modified. If the current verification ID does not match,
+     * then input verification is attempted anyways. If input verification is attempted and fails,
+     * then `valid_input_verification_id_inout` is set to null. If input verification is attempted and succeeds,
+     * then `valid_input_verification_id_inout` is set to the current used verification ID.
      */
-    bool check_tx_inputs(transaction& tx, uint64_t& pmax_used_block_height, crypto::hash& max_used_block_id, tx_verification_context &tvc, bool kept_by_block = false) const;
+    bool check_tx_inputs(transaction& tx,
+      uint64_t& pmax_used_block_height,
+      crypto::hash& max_used_block_id,
+      tx_verification_context &tvc,
+      crypto::hash &valid_input_verification_id_inout,
+      bool kept_by_block = false) const;
 
     /**
      * @brief get fee quantization mask
@@ -1249,9 +1273,6 @@ namespace cryptonote
     uint64_t m_prepare_nblocks;
     std::vector<block> *m_prepare_blocks;
 
-    // cache for verifying transaction RCT non semantics
-    mutable rct_ver_cache_t m_rct_ver_cache;
-
     /**
      * @brief Blockchain constructor
      *
@@ -1320,11 +1341,23 @@ namespace cryptonote
      *
      * @param tx the transaction to validate
      * @param tvc returned information about tx verification
+     * @param valid_input_verification_id_inout a previously valid verID if non-null, set on input verification
      * @param pmax_related_block_height return-by-pointer the height of the most recent block in the input set
      *
      * @return false if any validation step fails, otherwise true
+     *
+     * If `valid_input_verification_id_inout` is passed as null, then input verification proceeds as normal.
+     * If `valid_input_verification_id_inout` is non-null and the verification ID from the current chain
+     * state matches, then input verification is skipped, assumed to be successful, and
+     * `valid_input_verification_id_inout` is not modified. If the current verification ID does not match,
+     * then input verification is attempted anyways. If input verification is attempted and fails,
+     * then `valid_input_verification_id_inout` is set to null. If input verification is attempted and succeeds,
+     * then `valid_input_verification_id_inout` is set to the current used verification ID.
      */
-    bool check_tx_inputs(transaction& tx, tx_verification_context &tvc, uint64_t* pmax_used_block_height = NULL) const;
+    bool check_tx_inputs(transaction& tx,
+      tx_verification_context &tvc,
+      crypto::hash &valid_input_verification_id_inout,
+      uint64_t* pmax_used_block_height = NULL) const;
 
     /**
      * @brief performs a blockchain reorganization according to the longest chain rule
@@ -1588,18 +1621,6 @@ namespace cryptonote
      * @return false if a double spend was detected, otherwise true
      */
     bool check_for_double_spend(const transaction& tx, key_images_container& keys_this_block) const;
-
-    /**
-     * @brief validates a transaction input's ring signature
-     *
-     * @param tx_prefix_hash the transaction prefix' hash
-     * @param key_image the key image generated from the true input
-     * @param pubkeys the public keys for each input in the ring signature
-     * @param sig the signature generated for each input in the ring signature
-     * @param result false if the ring signature is invalid, otherwise true
-     */
-    void check_ring_signature(const crypto::hash &tx_prefix_hash, const crypto::key_image &key_image,
-        const std::vector<rct::ctkey> &pubkeys, const std::vector<crypto::signature> &sig, uint64_t &result) const;
 
     /**
      * @brief loads block hashes from compiled-in data set

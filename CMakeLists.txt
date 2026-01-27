@@ -43,7 +43,9 @@ include(CheckFunctionExists)
 if (POLICY CMP0148)
     cmake_policy(SET CMP0148 OLD) # https://cmake.org/cmake/help/latest/policy/CMP0148.html
 endif()
-include(FindPythonInterp)
+if (POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
 
 if (IOS)
     INCLUDE(CmakeLists_IOS.txt)
@@ -765,13 +767,6 @@ include(CheckTrezor)
     set(STATIC_ASSERT_FLAG "-Dstatic_assert=_Static_assert")
   endif()
 
-  try_compile(STATIC_ASSERT_CPP_RES "${CMAKE_CURRENT_BINARY_DIR}/static-assert" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/test-static-assert.cpp" CMAKE_FLAGS -DCMAKE_CXX_STANDARD=11)
-  if(STATIC_ASSERT_CPP_RES)
-    set(STATIC_ASSERT_CPP_FLAG "")
-  else()
-    set(STATIC_ASSERT_CPP_FLAG "-Dstatic_assert=_Static_assert")
-  endif()
-
   monero_enable_coverage()
   # With GCC 6.1.1 the compiled binary malfunctions due to aliasing. Until that
   # is fixed in the code (Issue #847), force compiler to be conservative.
@@ -856,7 +851,7 @@ include(CheckTrezor)
   message(STATUS "Using linker security hardening flags: ${LD_SECURITY_FLAGS}")
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE ${MINGW_FLAG} ${STATIC_ASSERT_FLAG} ${WARNINGS} ${C_WARNINGS} ${PIC_FLAG} ${C_SECURITY_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GNU_SOURCE ${MINGW_FLAG} ${STATIC_ASSERT_CPP_FLAG} ${WARNINGS} ${CXX_WARNINGS} ${PIC_FLAG} ${CXX_SECURITY_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GNU_SOURCE ${MINGW_FLAG} ${WARNINGS} ${CXX_WARNINGS} ${PIC_FLAG} ${CXX_SECURITY_FLAGS}")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LD_SECURITY_FLAGS}")
 
   # With GCC 6.1.1 the compiled binary malfunctions due to aliasing. Until that
@@ -1151,7 +1146,6 @@ include(external/supercop/functions.cmake) # place after setting flags and befor
 add_subdirectory(contrib)
 add_subdirectory(src)
 
-find_package(PythonInterp)
 option(ENABLE_FUZZ_TEST "Enable fuzz testing." OFF)
 if(BUILD_TESTS)
   message(STATUS "Building tests")
@@ -1190,13 +1184,3 @@ endif()
 
 # when ON - will install libwallet_merged into "lib"
 option(BUILD_GUI_DEPS "Build GUI dependencies." OFF)
-
-find_package(PythonInterp)
-find_program(iwyu_tool_path NAMES iwyu_tool.py iwyu_tool)
-if (iwyu_tool_path AND PYTHONINTERP_FOUND)
-  add_custom_target(iwyu
-    COMMAND "${PYTHON_EXECUTABLE}" "${iwyu_tool_path}" -p "${CMAKE_BINARY_DIR}" -- --no_fwd_decls
-    COMMENT "Running include-what-you-use tool"
-    VERBATIM
-  )
-endif()
